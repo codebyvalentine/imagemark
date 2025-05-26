@@ -44,9 +44,9 @@ export const metadata: Metadata = {
     siteName: "ImageMark",
     images: [
       {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
+        url: "/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
         alt: "ImageMark - Free Online Watermark Tool",
       },
     ],
@@ -55,16 +55,31 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ImageMark - Free Online Watermark Tool",
     description: "Add watermarks to your images for free. Batch processing, text & logo watermarks, instant download.",
-    images: ["/og-image.png"],
+    images: ["/android-chrome-512x512.png"],
     creator: "@imagemark",
   },
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
     ],
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
+    other: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "192x192",
+        url: "/android-chrome-192x192.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "512x512",
+        url: "/android-chrome-512x512.png",
+      },
+    ],
   },
   manifest: "/site.webmanifest",
   alternates: {
@@ -85,6 +100,8 @@ export default function RootLayout({
         <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
         <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
         <meta name="theme-color" content="#0D9488" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
