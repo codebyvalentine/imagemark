@@ -204,6 +204,7 @@ export default function WatermarkingTool() {
   const [isDownloading, setIsDownloading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [settings, setSettings] = useState<WatermarkSettings>(DEFAULT_SETTINGS)
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null)
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -388,6 +389,39 @@ export default function WatermarkingTool() {
         .catch((error) => console.error("Failed to load watermark image:", error))
     }
   }, [])
+
+  const openFullscreen = useCallback((canvas: HTMLCanvasElement) => {
+    const dataUrl = canvas.toDataURL("image/png")
+    setFullscreenImage(dataUrl)
+  }, [])
+
+  const closeFullscreen = useCallback(() => {
+    setFullscreenImage(null)
+  }, [])
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Escape" && fullscreenImage) {
+        closeFullscreen()
+      }
+    },
+    [fullscreenImage, closeFullscreen],
+  )
+
+  useEffect(() => {
+    if (fullscreenImage) {
+      document.addEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = "hidden"
+    } else {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = "unset"
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = "unset"
+    }
+  }, [fullscreenImage, handleKeyDown])
 
   // Loading state
   if (!mounted) {
@@ -690,7 +724,9 @@ export default function WatermarkingTool() {
                         }
                       }
                     }}
-                    className="w-full h-auto rounded-lg shadow-sm max-h-48 sm:max-h-64 object-contain"
+                    onClick={() => imageItem.canvas && openFullscreen(imageItem.canvas)}
+                    className="w-full h-auto rounded-lg shadow-sm max-h-48 sm:max-h-64 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                    title="Click to view fullscreen"
                   />
                 )}
 
@@ -712,6 +748,30 @@ export default function WatermarkingTool() {
               </div>
             ))}
           </div>
+
+          {/* Fullscreen Modal */}
+          {fullscreenImage && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+              onClick={closeFullscreen}
+            >
+              <div className="relative max-w-full max-h-full">
+                <button
+                  onClick={closeFullscreen}
+                  className="absolute top-4 right-4 text-white hover:text-gray-300 z-10 bg-black bg-opacity-50 rounded-full p-2"
+                  title="Close fullscreen"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+                <img
+                  src={fullscreenImage || "/placeholder.svg"}
+                  alt="Fullscreen preview"
+                  className="max-w-full max-h-full object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <input
