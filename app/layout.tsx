@@ -2,6 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/react"
+import { Suspense } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -85,7 +87,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://imagemark.app",
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -105,7 +107,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#0D9488" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Suspense>{children}</Suspense>
+        <Analytics />
+      </body>
     </html>
   )
 }
