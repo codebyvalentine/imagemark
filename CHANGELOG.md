@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimized performance and memory management
 \`\`\`
 
-```typescriptreact file="app/layout.tsx"
+\`\`\`typescriptreact file="app/layout.tsx"
 [v0-no-op-code-block-prefix]import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from 'next/font/google'

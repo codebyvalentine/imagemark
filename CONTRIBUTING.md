@@ -1,147 +1,80 @@
 # Contributing to ImageMark
 
-Thank you for your interest in contributing to ImageMark! This document provides guidelines and information for contributors.
+We welcome contributions to ImageMark! This document outlines the guidelines for contributing to the project.
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our Code of Conduct. Please treat all contributors with respect and create a welcoming environment for everyone.
+Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
-## Getting Started
+## How to Contribute
 
-### Prerequisites
+Here are several ways you can contribute to ImageMark:
 
-- Node.js 18 or higher
-- npm, yarn, or pnpm
-- Git
+*   **Report bugs:** If you find a bug, please submit an issue on GitHub. Be sure to include detailed steps to reproduce the bug.
+*   **Suggest enhancements:** Have an idea for a new feature or improvement? Submit an issue on GitHub to discuss it.
+*   **Submit pull requests:** If you'd like to contribute code, please follow the guidelines below.
+*   **Improve documentation:** Help us make the documentation better by submitting pull requests with improvements.
 
-### Development Setup
+## Development Setup
 
-1. **Fork the repository**
-   \`\`\`bash
-   git clone https://github.com/codebyvalentine/imagemark.git
-   cd imagemark
-   \`\`\`
+1.  **Fork the repository:** Fork the ImageMark repository to your GitHub account.
 
-2. **Install dependencies**
-   \`\`\`bash
-   npm install
-   \`\`\`
+2.  **Clone the repository:** Clone your forked repository to your local machine:
 
-3. **Create a feature branch**
-   \`\`\`bash
-   git checkout -b feature/your-feature-name
-   \`\`\`
+    \`\`\`bash
+    git clone https://github.com/codebyvalentine/imagemark.git
+    cd imagemark
+    \`\`\`
 
-4. **Start development server**
-   \`\`\`bash
-   npm run dev
-   \`\`\`
+3.  **Create a virtual environment (recommended):** It's recommended to create a virtual environment to isolate the project dependencies.
 
-## Development Guidelines
+    \`\`\`bash
+    python3 -m venv venv
+    source venv/bin/activate  # On Linux/macOS
+    venv\Scripts\activate  # On Windows
+    \`\`\`
 
-### Code Style
+4.  **Install dependencies:** Install the project dependencies using pip:
 
-- Use TypeScript for all new code
-- Follow ESLint and Prettier configurations
-- Use semantic HTML and accessible markup
-- Follow React best practices and hooks patterns
-- Use Tailwind CSS for styling
+    \`\`\`bash
+    pip install -r requirements.txt
+    \`\`\`
 
-### Commit Messages
+5.  **Make your changes:** Create a new branch for your changes and make your modifications.
 
-Use conventional commit format:
-\`\`\`
-type(scope): description
+6.  **Test your changes:** Ensure that your changes are working correctly by running the tests.
 
-[optional body]
+7.  **Commit your changes:** Commit your changes with a clear and concise commit message.
 
-[optional footer]
-\`\`\`
+8.  **Push your changes:** Push your changes to your forked repository.
 
-Types:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
+9.  **Submit a pull request:** Submit a pull request to the main ImageMark repository.
 
-Examples:
-\`\`\`
-feat(watermark): add rotation control for image watermarks
-fix(upload): resolve drag and drop file validation issue
-docs(readme): update installation instructions
-\`\`\`
+## Pull Request Guidelines
 
-### Testing
+*   **Follow the coding style:** Please adhere to the existing coding style.
+*   **Write tests:** If you're adding new functionality, please include tests to ensure that it works correctly.
+*   **Document your code:** Please document your code clearly and concisely.
+*   **Keep pull requests small:** Smaller pull requests are easier to review and merge.
+*   **Provide a clear description:** Provide a clear and concise description of your changes in the pull request.
 
-- Write unit tests for utility functions
-- Test components with React Testing Library
-- Ensure cross-browser compatibility
-- Test responsive design on multiple screen sizes
+## Reporting Bugs
 
-### Pull Request Process
+When reporting bugs, please include the following information:
 
-1. **Update documentation** if needed
-2. **Add tests** for new functionality
-3. **Ensure all tests pass**
-4. **Update CHANGELOG.md** with your changes
-5. **Request review** from maintainers
+*   **Operating system:** The operating system you're using.
+*   **Python version:** The version of Python you're using.
+*   **ImageMark version:** The version of ImageMark you're using.
+*   **Steps to reproduce:** Detailed steps to reproduce the bug.
+*   **Expected behavior:** The expected behavior.
+*   **Actual behavior:** The actual behavior.
 
-### Pull Request Template
+## Suggesting Enhancements
 
-\`\`\`markdown
-## Description
-Brief description of changes
+When suggesting enhancements, please include the following information:
 
-## Type of Change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
+*   **Description:** A clear and concise description of the enhancement.
+*   **Motivation:** The motivation for the enhancement.
+*   **Use cases:** Example use cases for the enhancement.
 
-## Testing
-- [ ] Tests pass locally
-- [ ] Added new tests
-- [ ] Manual testing completed
-
-## Screenshots
-If applicable, add screenshots of UI changes
-\`\`\`
-
-## Project Structure
-
-\`\`\`
-imagemark/
-├── app/                    # Next.js app directory
-├── components/            # Reusable components
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utility functions
-├── public/               # Static assets
-└── types/                # TypeScript type definitions
-\`\`\`
-
-## Feature Requests
-
-Before submitting a feature request:
-
-1. Check existing issues for duplicates
-2. Provide clear use case and rationale
-3. Consider implementation complexity
-4. Discuss with maintainers if it's a major change
-
-## Bug Reports
-
-Include:
-- Clear description of the issue
-- Steps to reproduce
-- Expected vs actual behavior
-- Browser and OS information
-- Screenshots if applicable
-
-## Questions?
-
-Feel free to open an issue for questions or reach out to the maintainers.
-
-Thank you for contributing to ImageMark! 🎉
+Thank you for contributing to ImageMark!
