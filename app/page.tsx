@@ -509,16 +509,20 @@ export default function WatermarkingTool() {
               <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Watermark Settings</h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
                   {/* Type Selection */}
                   <div className="sm:col-span-2 lg:col-span-1">
-                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Type</Label>
+                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Watermark Type</Label>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant={settings.type === "text" ? "default" : "outline"}
                         size="sm"
                         onClick={() => updateSetting("type", "text")}
-                        className={`h-9 ${settings.type === "text" ? "bg-teal-600 hover:bg-teal-700" : ""}`}
+                        className={`h-10 font-medium transition-all ${
+                          settings.type === "text"
+                            ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md"
+                            : "border-gray-300 hover:border-teal-400 hover:text-teal-600"
+                        }`}
                       >
                         Text
                       </Button>
@@ -526,7 +530,11 @@ export default function WatermarkingTool() {
                         variant={settings.type === "image" ? "default" : "outline"}
                         size="sm"
                         onClick={() => updateSetting("type", "image")}
-                        className={`h-9 ${settings.type === "image" ? "bg-teal-600 hover:bg-teal-700" : ""}`}
+                        className={`h-10 font-medium transition-all ${
+                          settings.type === "image"
+                            ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md"
+                            : "border-gray-300 hover:border-teal-400 hover:text-teal-600"
+                        }`}
                       >
                         Image
                       </Button>
@@ -546,9 +554,10 @@ export default function WatermarkingTool() {
                         />
                       </div>
 
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Size: {settings.fontSize}%
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                          <span>Size</span>
+                          <span className="text-teal-600 font-semibold">{settings.fontSize}%</span>
                         </Label>
                         <Slider
                           value={[settings.fontSize]}
@@ -556,18 +565,22 @@ export default function WatermarkingTool() {
                           min={5}
                           max={30}
                           step={1}
-                          className="[&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-teal-600"
+                          className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
                         />
                       </div>
 
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">Color</Label>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">Text Color</Label>
                         <div className="grid grid-cols-2 gap-2">
                           <Button
                             variant={settings.fontMode === "light" ? "default" : "outline"}
                             size="sm"
                             onClick={() => updateSetting("fontMode", "light")}
-                            className={`h-8 text-xs ${settings.fontMode === "light" ? "bg-teal-600 hover:bg-teal-700" : ""}`}
+                            className={`h-9 text-sm font-medium transition-all ${
+                              settings.fontMode === "light"
+                                ? "bg-teal-600 hover:bg-teal-700 text-white"
+                                : "border-gray-300 hover:border-teal-400 hover:text-teal-600"
+                            }`}
                           >
                             Light
                           </Button>
@@ -575,16 +588,21 @@ export default function WatermarkingTool() {
                             variant={settings.fontMode === "dark" ? "default" : "outline"}
                             size="sm"
                             onClick={() => updateSetting("fontMode", "dark")}
-                            className={`h-8 text-xs ${settings.fontMode === "dark" ? "bg-teal-600 hover:bg-teal-700" : ""}`}
+                            className={`h-9 text-sm font-medium transition-all ${
+                              settings.fontMode === "dark"
+                                ? "bg-teal-600 hover:bg-teal-700 text-white"
+                                : "border-gray-300 hover:border-teal-400 hover:text-teal-600"
+                            }`}
                           >
                             Dark
                           </Button>
                         </div>
                       </div>
 
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Rotation: {settings.rotation}°
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                          <span>Rotation</span>
+                          <span className="text-teal-600 font-semibold">{settings.rotation}°</span>
                         </Label>
                         <Slider
                           value={[settings.rotation]}
@@ -592,7 +610,7 @@ export default function WatermarkingTool() {
                           min={-180}
                           max={180}
                           step={5}
-                          className="[&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-teal-600"
+                          className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
                         />
                       </div>
                     </>
@@ -611,9 +629,10 @@ export default function WatermarkingTool() {
                         />
                       </div>
 
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Size: {settings.imageSize}%
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                          <span>Size</span>
+                          <span className="text-teal-600 font-semibold">{settings.imageSize}%</span>
                         </Label>
                         <Slider
                           value={[settings.imageSize]}
@@ -621,14 +640,14 @@ export default function WatermarkingTool() {
                           min={5}
                           max={50}
                           step={1}
-                          className="[&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-teal-600"
+                          className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
                         />
                       </div>
                     </>
                   )}
 
                   {/* Advanced Settings */}
-                  <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
+                  <div className="sm:col-span-2 lg:col-span-3 xl:col-span-5">
                     <Collapsible>
                       <CollapsibleTrigger asChild>
                         <Button variant="ghost" size="sm" className="text-gray-600 p-0 hover:text-teal-600">
@@ -638,9 +657,10 @@ export default function WatermarkingTool() {
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div>
-                            <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                              Opacity: {settings.opacity}%
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                              <span>Opacity</span>
+                              <span className="text-teal-600 font-semibold">{settings.opacity}%</span>
                             </Label>
                             <Slider
                               value={[settings.opacity]}
@@ -648,13 +668,14 @@ export default function WatermarkingTool() {
                               min={1}
                               max={100}
                               step={1}
-                              className="[&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-teal-600"
+                              className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
                             />
                           </div>
 
-                          <div>
-                            <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                              Position X: {settings.positionX}%
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                              <span>Position X</span>
+                              <span className="text-teal-600 font-semibold">{settings.positionX}%</span>
                             </Label>
                             <Slider
                               value={[settings.positionX]}
@@ -662,13 +683,14 @@ export default function WatermarkingTool() {
                               min={0}
                               max={100}
                               step={1}
-                              className="[&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-teal-600"
+                              className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
                             />
                           </div>
 
-                          <div>
-                            <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                              Position Y: {settings.positionY}%
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                              <span>Position Y</span>
+                              <span className="text-teal-600 font-semibold">{settings.positionY}%</span>
                             </Label>
                             <Slider
                               value={[settings.positionY]}
@@ -676,7 +698,7 @@ export default function WatermarkingTool() {
                               min={0}
                               max={100}
                               step={1}
-                              className="[&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-teal-600"
+                              className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
                             />
                           </div>
                         </div>
@@ -715,7 +737,7 @@ export default function WatermarkingTool() {
                 {imageItem.canvas && (
                   <canvas
                     ref={(canvas) => {
-                      if (canvas && imageItem.canvas) {
+                      if (canvas && imageItem.canvas && imageItem.canvas.width > 0 && imageItem.canvas.height > 0) {
                         const ctx = canvas.getContext("2d")
                         if (ctx) {
                           canvas.width = imageItem.canvas.width
