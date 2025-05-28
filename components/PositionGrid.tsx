@@ -26,7 +26,23 @@ export const PositionGrid: React.FC<PositionGridProps> = memo(({ selectedPreset,
           title={preset.name}
           aria-label={`Position: ${preset.name}`}
         >
-          <div className="text-current mb-1">{preset.icon}</div>
+          <div className="text-current mb-1">
+            <div className="w-8 h-8 border-2 border-current rounded-md relative bg-white">
+              <div 
+                className="absolute w-2 h-2  bg-current rounded-sm z-10"
+                style={{
+                  top: preset.id.includes('top') ? '2px' : preset.id.includes('bottom') ? 'auto' : '50%',
+                  bottom: preset.id.includes('bottom') ? '2px' : 'auto',
+                  left: preset.id.includes('left') ? '2px' : preset.id.includes('right') ? 'auto' : '50%',
+                  right: preset.id.includes('right') ? '2px' : 'auto',
+                  transform: preset.id.includes('center') ? 
+                    (preset.id === 'center' ? 'translate(-50%, -50%)' : 
+                     preset.id.includes('center-left') || preset.id.includes('center-right') ? 'translateY(-50%)' : 
+                     'translateX(-50%)') : 'none'
+                }}
+              />
+            </div>
+          </div>
           <span className="text-xs font-medium text-center leading-tight">{preset.name}</span>
 
           {selectedPreset === preset.id && (
