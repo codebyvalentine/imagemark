@@ -46,6 +46,8 @@ export default function WatermarkingTool() {
   const [settings, setSettings] = useState<WatermarkSettings>(DEFAULT_SETTINGS)
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null)
   const [editingImageId, setEditingImageId] = useState<string | null>(null)
+  const [showPositionPresets, setShowPositionPresets] = useState(false)
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -287,6 +289,28 @@ export default function WatermarkingTool() {
   const editingImage = useMemo(() => {
     return editingImageId ? images.find((img) => img.id === editingImageId) : null
   }, [editingImageId, images])
+
+  const togglePositionPresets = useCallback(() => {
+    setShowPositionPresets((prev) => {
+      const newValue = !prev
+      // If opening position presets, close advanced settings
+      if (newValue) {
+        setShowAdvancedSettings(false)
+      }
+      return newValue
+    })
+  }, [])
+
+  const toggleAdvancedSettings = useCallback(() => {
+    setShowAdvancedSettings((prev) => {
+      const newValue = !prev
+      // If opening advanced settings, close position presets
+      if (newValue) {
+        setShowPositionPresets(false)
+      }
+      return newValue
+    })
+  }, [])
 
   // Loading state
   if (!mounted) {
@@ -552,20 +576,43 @@ export default function WatermarkingTool() {
 
                   {/* Position Presets */}
                   <div className="sm:col-span-2 lg:col-span-3 xl:col-span-5">
-                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Position Presets</Label>
-                    <PositionGrid
-                      selectedPreset={settings.positionPreset}
-                      onSelectPreset={handlePositionPresetSelect}
-                    />
+                    <Collapsible open={showPositionPresets} onOpenChange={setShowPositionPresets}>
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-700 p-0 hover:text-teal-600 mb-3 font-medium"
+                          onClick={togglePositionPresets}
+                        >
+                          Position Presets
+                          <ChevronDown
+                            className={`w-4 h-4 ml-2 transition-transform ${showPositionPresets ? "rotate-180" : ""}`}
+                          />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <PositionGrid
+                          selectedPreset={settings.positionPreset}
+                          onSelectPreset={handlePositionPresetSelect}
+                        />
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
 
                   {/* Advanced Settings */}
                   <div className="sm:col-span-2 lg:col-span-3 xl:col-span-5">
-                    <Collapsible>
+                    <Collapsible open={showAdvancedSettings} onOpenChange={setShowAdvancedSettings}>
                       <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-gray-600 p-0 hover:text-teal-600 mt-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-600 p-0 hover:text-teal-600 mt-4"
+                          onClick={toggleAdvancedSettings}
+                        >
                           Advanced Settings
-                          <ChevronDown className="w-4 h-4 ml-2" />
+                          <ChevronDown
+                            className={`w-4 h-4 ml-2 transition-transform ${showAdvancedSettings ? "rotate-180" : ""}`}
+                          />
                         </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-4">
