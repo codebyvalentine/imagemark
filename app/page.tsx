@@ -60,7 +60,7 @@ export default function WatermarkingTool() {
   const debouncedSettings = useDebounce(settings, 300)
 
   // Effects
-  useState(() => {
+  useEffect(() => {
     setMounted(true)
   }, [])
 
@@ -75,6 +75,33 @@ export default function WatermarkingTool() {
       )
     }
   }, [debouncedSettings, hasWatermark, watermarkImage]) // Remove processImage and images.length from dependencies to prevent infinite loops
+
+  // Keyboard event handler - only run on client side
+  useEffect(() => {
+    if (!mounted) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (fullscreenImage) {
+          closeFullscreen()
+        } else if (editingImageId) {
+          setEditingImageId(null)
+        }
+      }
+    }
+
+    if (fullscreenImage || editingImageId) {
+      document.addEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = "unset"
+    }
+  }, [mounted, fullscreenImage, editingImageId])
 
   // Memoized handlers
   const handleFileUpload = useCallback(
@@ -239,31 +266,6 @@ export default function WatermarkingTool() {
   const closeFullscreen = useCallback(() => {
     setFullscreenImage(null)
   }, [])
-
-  // Keyboard event handler
-  useState(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (fullscreenImage) {
-          closeFullscreen()
-        } else if (editingImageId) {
-          setEditingImageId(null)
-        }
-      }
-    }
-
-    if (fullscreenImage || editingImageId) {
-      document.addEventListener("keydown", handleKeyDown)
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "unset"
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-      document.body.style.overflow = "unset"
-    }
-  }, [fullscreenImage, editingImageId, closeFullscreen])
 
   const handleImageSettingsSave = useCallback(
     (imageId: string, newSettings: WatermarkSettings) => {
