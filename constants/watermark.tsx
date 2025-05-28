@@ -26,6 +26,13 @@ export const ACCEPTED_FILE_TYPES = [
   "image/svg+xml",
 ] as const
 
+export const ACCEPTED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime", 
+  "video/x-msvideo"
+] as const
+
 export const ANALYSIS_SIZE = 100
 
 export const FONT_OPTIONS: FontOption[] = [
@@ -65,8 +72,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 10,
     y: 10,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -76,8 +83,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 50,
     y: 10,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -87,8 +94,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 90,
     y: 10,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -98,8 +105,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 10,
     y: 50,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute top-1/2 left-0.5 transform -translate-y-1/2 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute top-1/2 left-0.5 transform -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -109,8 +116,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 50,
     y: 50,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -120,8 +127,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 90,
     y: 50,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute top-1/2 right-0.5 transform -translate-y-1/2 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute top-1/2 right-0.5 transform -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -131,8 +138,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 10,
     y: 90,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute bottom-0.5 left-0.5 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute bottom-0.5 left-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -142,8 +149,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 50,
     y: 90,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },
@@ -153,8 +160,8 @@ export const POSITION_PRESETS: PositionPreset[] = [
     x: 90,
     y: 90,
     icon: (
-      <div className="w-8 h-8 border-2 border-current rounded-md relative">
-        <div className="absolute bottom-0.5 right-0.5 w-2 h-2 bg-current rounded-sm" />
+      <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
+        <div className="absolute bottom-0.5 right-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
       </div>
     ),
   },

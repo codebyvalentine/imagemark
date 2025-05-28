@@ -22,6 +22,13 @@ export interface ImageItem {
   customSettings?: WatermarkSettings
 }
 
+export interface VideoItem {
+  id: string
+  file: File
+  canvas?: Promise<Blob>
+  customSettings?: WatermarkSettings
+}
+
 export interface PositionPreset {
   id: string
   name: string
@@ -35,3 +42,10 @@ export interface FontOption {
   family: string
   category: string
 }
+
+export const ACCEPTED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm", 
+  "video/quicktime",
+  "video/x-msvideo"
+] as const

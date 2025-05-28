@@ -125,13 +125,25 @@ const drawImageWatermark = (
   settings: WatermarkSettings,
   watermarkImage: HTMLImageElement,
 ): void => {
+  // Calculate watermark size based on imageSize setting
   const watermarkWidth = (settings.imageSize / 100) * image.width
   const aspectRatio = watermarkImage.height / watermarkImage.width
   const watermarkHeight = watermarkWidth * aspectRatio
 
+  // Calculate position
   const x = (settings.positionX / 100) * image.width - watermarkWidth / 2
   const y = (settings.positionY / 100) * image.height - watermarkHeight / 2
 
+  // Apply rotation if needed
+  if (settings.rotation !== 0) {
+    const centerX = (settings.positionX / 100) * image.width
+    const centerY = (settings.positionY / 100) * image.height
+    ctx.translate(centerX, centerY)
+    ctx.rotate((settings.rotation * Math.PI) / 180)
+    ctx.translate(-centerX, -centerY)
+  }
+
+  // Draw the watermark image
   ctx.drawImage(watermarkImage, x, y, watermarkWidth, watermarkHeight)
 }
 

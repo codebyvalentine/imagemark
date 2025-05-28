@@ -27,9 +27,9 @@ export const PositionGrid: React.FC<PositionGridProps> = memo(({ selectedPreset,
           aria-label={`Position: ${preset.name}`}
         >
           <div className="text-current mb-1">
-            <div className="w-8 h-8 border-2 border-current rounded-md relative bg-white">
+            <div className="w-8 h-8 border-2 border-gray-400 rounded-md relative bg-white">
               <div 
-                className="absolute w-2 h-2  bg-current rounded-sm z-10"
+                className="absolute w-2 h-2 bg-gray-500 rounded-sm z-10"
                 style={{
                   top: preset.id.includes('top') ? '2px' : preset.id.includes('bottom') ? 'auto' : '50%',
                   bottom: preset.id.includes('bottom') ? '2px' : 'auto',

@@ -11,17 +11,19 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useEffect } from "react"
 
 // Types
-import type { WatermarkSettings, ImageItem, PositionPreset } from "@/types/watermark"
+import type { WatermarkSettings, ImageItem, PositionPreset, VideoItem } from "@/types/watermark"
 
 // Constants
-import { DEFAULT_SETTINGS, FONT_OPTIONS, ACCEPTED_FILE_TYPES } from "@/constants/watermark"
+import { DEFAULT_SETTINGS, FONT_OPTIONS, ACCEPTED_FILE_TYPES, ACCEPTED_VIDEO_TYPES } from "@/constants/watermark"
 
 // Utils
 import { createImageFromFile, downloadBlob, canvasToBlob } from "@/utils/image"
+import { createVideoFromFile } from "@/utils/video"
 
 // Hooks
 import { useWatermark } from "@/hooks/useWatermark"
 import { useImageUpload } from "@/hooks/useImageUpload"
+import { useVideoUpload } from "@/hooks/useVideoUpload"
 import { useDebounce } from "@/hooks/useDebounce"
 
 // Components
@@ -29,15 +31,18 @@ import { ImageMarkLogo } from "@/components/ImageMarkLogo"
 import { ColorPicker } from "@/components/ColorPicker"
 import { PositionGrid } from "@/components/PositionGrid"
 import { ImageCanvas } from "@/components/ImageCanvas"
+import { VideoCanvas } from "@/components/VideoCanvas"
 import { LoadingSpinner } from "@/components/LoadingSpinner"
 
 // Lazy load heavy components
 const ImageSettingsModal = lazy(() => import("@/components/ImageSettingsModal"))
+const VideoSettingsModal = lazy(() => import("@/components/VideoSettingsModal"))
 
 export default function WatermarkingTool() {
   // State
   const [mounted, setMounted] = useState(false)
   const [images, setImages] = useState<ImageItem[]>([])
+  const [videos, setVideos] = useState<VideoItem[]>([])
   const [watermarkImage, setWatermarkImage] = useState<HTMLImageElement | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [hasEditedSettings, setHasEditedSettings] = useState(false)
@@ -45,7 +50,9 @@ export default function WatermarkingTool() {
   const [dragActive, setDragActive] = useState(false)
   const [settings, setSettings] = useState<WatermarkSettings>(DEFAULT_SETTINGS)
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null)
+  const [fullscreenVideo, setFullscreenVideo] = useState<string | null>(null)
   const [editingImageId, setEditingImageId] = useState<string | null>(null)
+  const [editingVideoId, setEditingVideoId] = useState<string | null>(null)
   const [showPositionPresets, setShowPositionPresets] = useState(false)
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
 
@@ -54,6 +61,7 @@ export default function WatermarkingTool() {
 
   // Custom Hooks
   const { processFiles, isProcessing } = useImageUpload()
+  const { processVideos, isProcessingVideos } = useVideoUpload()
   const { analysisCanvasRef, analyzeBrightness, processImage, hasWatermark } = useWatermark(settings, watermarkImage)
 
   // Debounced settings for performance
@@ -76,6 +84,39 @@ export default function WatermarkingTool() {
     }
   }, [debouncedSettings, hasWatermark, watermarkImage]) // Remove processImage and images.length from dependencies to prevent infinite loops
 
+  // Replace the video processing useEffect with this corrected version:
+  useEffect(() => {
+    if (videos.length > 0) {
+      const processVideos = async () => {
+        const updatedVideos = await Promise.all(
+          videos.map(async (videoItem) => {
+            try {
+              if (!videoItem.canvas) {
+                const videoSettings = videoItem.customSettings || settings
+                const processedBlob = await createVideoFromFile(
+                  videoItem.file,
+                  hasWatermark ? videoSettings : undefined,
+                  watermarkImage,
+                )
+                return {
+                  ...videoItem,
+                  canvas: Promise.resolve(processedBlob),
+                }
+              }
+              return videoItem
+            } catch (error) {
+              console.error("Error processing video:", error)
+              return videoItem
+            }
+          }),
+        )
+        setVideos(updatedVideos)
+      }
+
+      processVideos()
+    }
+  }, [debouncedSettings, hasWatermark, watermarkImage, videos.length])
+
   // Keyboard event handler - only run on client side
   useEffect(() => {
     if (!mounted) return
@@ -86,11 +127,15 @@ export default function WatermarkingTool() {
           closeFullscreen()
         } else if (editingImageId) {
           setEditingImageId(null)
+        } else if (fullscreenVideo) {
+          closeFullscreenVideo()
+        } else if (editingVideoId) {
+          setEditingVideoId(null)
         }
       }
     }
 
-    if (fullscreenImage || editingImageId) {
+    if (fullscreenImage || editingImageId || fullscreenVideo || editingVideoId) {
       document.addEventListener("keydown", handleKeyDown)
       document.body.style.overflow = "hidden"
     } else {
@@ -101,7 +146,7 @@ export default function WatermarkingTool() {
       document.removeEventListener("keydown", handleKeyDown)
       document.body.style.overflow = "unset"
     }
-  }, [mounted, fullscreenImage, editingImageId])
+  }, [mounted, fullscreenImage, editingImageId, fullscreenVideo, editingVideoId])
 
   // Memoized handlers
   const handleFileUpload = useCallback(
@@ -130,14 +175,68 @@ export default function WatermarkingTool() {
     [processFiles, analyzeBrightness, processImage],
   )
 
+  // Also update the video upload handler:
+  const handleVideoUpload = useCallback(
+    async (files: FileList | File[]) => {
+      const newVideos = await processVideos(files)
+
+      if (newVideos.length > 0) {
+        // Add videos first
+        setVideos((prev) => [...prev, ...newVideos])
+
+        // Process videos after a short delay
+        setTimeout(async () => {
+          const processedVideos = await Promise.all(
+            newVideos.map(async (videoItem) => {
+              try {
+                const videoSettings = videoItem.customSettings || settings
+                const processedBlob = await createVideoFromFile(
+                  videoItem.file,
+                  hasWatermark ? videoSettings : undefined,
+                  watermarkImage,
+                )
+                return {
+                  ...videoItem,
+                  canvas: Promise.resolve(processedBlob),
+                }
+              } catch (error) {
+                console.error("Error processing video:", error)
+                return {
+                  ...videoItem,
+                  canvas: Promise.resolve(new Blob([videoItem.file], { type: "video/mp4" })),
+                }
+              }
+            }),
+          )
+
+          setVideos((current) => {
+            const existingVideos = current.filter((v) => !newVideos.find((nv) => nv.id === v.id))
+            return [...existingVideos, ...processedVideos]
+          })
+        }, 100)
+      }
+    },
+    [processVideos, settings, hasWatermark, watermarkImage],
+  )
+
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files
       if (files) {
-        handleFileUpload(files)
+        const fileArray = Array.from(files)
+        const imageFiles = fileArray.filter((file) => ACCEPTED_FILE_TYPES.includes(file.type as any))
+        const videoFiles = fileArray.filter((file) => ACCEPTED_VIDEO_TYPES.includes(file.type as any))
+
+        if (imageFiles.length > 0) {
+          handleFileUpload(imageFiles)
+        }
+
+        if (videoFiles.length > 0) {
+          handleVideoUpload(videoFiles)
+        }
       }
     },
-    [handleFileUpload],
+    [handleFileUpload, handleVideoUpload],
   )
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -153,22 +252,38 @@ export default function WatermarkingTool() {
       setDragActive(false)
 
       if (e.dataTransfer.files) {
-        handleFileUpload(e.dataTransfer.files)
+        const files = e.dataTransfer.files
+        const imageFiles = Array.from(files).filter((file) => ACCEPTED_FILE_TYPES.includes(file.type))
+        const videoFiles = Array.from(files).filter((file) => ACCEPTED_VIDEO_TYPES.includes(file.type))
+
+        if (imageFiles.length > 0) {
+          handleFileUpload(imageFiles)
+        }
+
+        if (videoFiles.length > 0) {
+          handleVideoUpload(videoFiles)
+        }
       }
     },
-    [handleFileUpload],
+    [handleFileUpload, handleVideoUpload],
   )
 
   const removeImage = useCallback((id: string) => {
     setImages((prev) => prev.filter((img) => img.id !== id))
   }, [])
 
+  const removeVideo = useCallback((id: string) => {
+    setVideos((prev) => prev.filter((vid) => vid.id !== id))
+  }, [])
+
   const goHome = useCallback(() => {
     setImages([])
+    setVideos([])
     setShowSettings(false)
     setHasEditedSettings(false)
     setWatermarkImage(null)
     setEditingImageId(null)
+    setEditingVideoId(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -193,8 +308,25 @@ export default function WatermarkingTool() {
     }
   }, [])
 
+  // And update the downloadSingleVideo function:
+  const downloadSingleVideo = useCallback(async (videoItem: VideoItem) => {
+    if (!videoItem.canvas) return
+
+    try {
+      const blob = await videoItem.canvas
+      if (!blob || blob.size === 0) {
+        throw new Error("Invalid video blob")
+      }
+
+      const filename = `watermarked-${videoItem.file.name.split(".")[0]}.mp4`
+      await downloadBlob(blob, filename)
+    } catch (error) {
+      console.error("Download failed:", error)
+    }
+  }, [])
+
   const downloadAllAsZip = useCallback(async () => {
-    if (images.length === 0) return
+    if (images.length === 0 && videos.length === 0) return
 
     setIsDownloading(true)
 
@@ -211,7 +343,15 @@ export default function WatermarkingTool() {
         zip.file(fileName, blob)
       })
 
-      await Promise.all(blobPromises)
+      const videoBlobPromises = videos.map(async (videoItem) => {
+        if (!videoItem.canvas) return
+
+        const blob = await videoItem.canvas
+        const fileName = `watermarked-${videoItem.file.name.split(".")[0]}.mp4`
+        zip.file(fileName, blob)
+      })
+
+      await Promise.all([...blobPromises, ...videoBlobPromises])
 
       const zipBlob = await zip.generateAsync({ type: "blob" })
       const filename = `imagemark-watermarked-${Date.now()}.zip`
@@ -221,7 +361,7 @@ export default function WatermarkingTool() {
     } finally {
       setIsDownloading(false)
     }
-  }, [images])
+  }, [images, videos])
 
   const resetSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS)
@@ -258,6 +398,26 @@ export default function WatermarkingTool() {
     }
   }, [])
 
+  // And fix the fullscreen video handler:
+  const openFullscreenVideo = useCallback(async (canvas: Promise<Blob>) => {
+    try {
+      const blob = await canvas
+      if (blob && blob.size > 0) {
+        const url = URL.createObjectURL(blob)
+        setFullscreenVideo(url)
+      }
+    } catch (error) {
+      console.error("Error opening fullscreen video:", error)
+    }
+  }, [])
+
+  const closeFullscreenVideo = useCallback(() => {
+    if (fullscreenVideo) {
+      URL.revokeObjectURL(fullscreenVideo)
+    }
+    setFullscreenVideo(null)
+  }, [fullscreenVideo])
+
   const openFullscreen = useCallback((canvas: HTMLCanvasElement) => {
     const dataUrl = canvas.toDataURL("image/png")
     setFullscreenImage(dataUrl)
@@ -288,9 +448,34 @@ export default function WatermarkingTool() {
     [settings, processImage],
   )
 
+  const handleVideoSettingsSave = useCallback(
+    async (videoId: string, newSettings: WatermarkSettings) => {
+      setVideos((prev) =>
+        prev.map((vid) => {
+          if (vid.id === videoId) {
+            const isGlobalSettings = JSON.stringify(newSettings) === JSON.stringify(settings)
+            const updatedItem = {
+              ...vid,
+              customSettings: isGlobalSettings ? undefined : newSettings,
+            }
+            // Update canvas immediately with new settings
+            updatedItem.canvas = createVideoFromFile(updatedItem.file, newSettings, watermarkImage)
+            return updatedItem
+          }
+          return vid
+        }),
+      )
+    },
+    [settings, watermarkImage],
+  )
+
   const editingImage = useMemo(() => {
     return editingImageId ? images.find((img) => img.id === editingImageId) : null
   }, [editingImageId, images])
+
+  const editingVideo = useMemo(() => {
+    return editingVideoId ? videos.find((vid) => vid.id === editingVideoId) : null
+  }, [editingVideoId, videos])
 
   const togglePositionPresets = useCallback(() => {
     setShowPositionPresets((prev) => {
@@ -323,8 +508,8 @@ export default function WatermarkingTool() {
     )
   }
 
-  // Results view - after images are uploaded
-  if (images.length > 0) {
+  // Results view - after images and videos are uploaded
+  if (images.length > 0 || videos.length > 0) {
     return (
       <div className="min-h-screen bg-white">
         {/* Header */}
@@ -344,7 +529,7 @@ export default function WatermarkingTool() {
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 className="border-gray-300 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
-                title="Add more images"
+                title="Add more files"
               >
                 <Plus className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Add More</span>
@@ -361,9 +546,9 @@ export default function WatermarkingTool() {
               </Button>
               <Button
                 onClick={downloadAllAsZip}
-                disabled={isDownloading || images.length === 0}
+                disabled={isDownloading || (images.length === 0 && videos.length === 0)}
                 className="bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-xs sm:text-sm px-3 sm:px-6 h-8 sm:h-9"
-                title="Download all images as zip"
+                title="Download all images and videos as zip"
               >
                 {isDownloading ? (
                   <LoadingSpinner size="sm" className="sm:mr-2" />
@@ -545,34 +730,6 @@ export default function WatermarkingTool() {
                           className="text-sm focus:ring-teal-500 focus:border-teal-500"
                         />
                       </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
-                          <span>Size</span>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="number"
-                              value={settings.imageSize}
-                              onChange={(e) => {
-                                const value = Math.max(5, Math.min(50, Number(e.target.value) || 5))
-                                updateSetting("imageSize", value)
-                              }}
-                              className="w-16 h-6 px-2 text-xs text-center border-gray-300 focus:ring-teal-500 focus:border-teal-500"
-                              min={5}
-                              max={50}
-                            />
-                            <span className="text-xs text-gray-500">%</span>
-                          </div>
-                        </Label>
-                        <Slider
-                          value={[settings.imageSize]}
-                          onValueChange={(value) => updateSetting("imageSize", value[0])}
-                          min={5}
-                          max={50}
-                          step={1}
-                          className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
-                        />
-                      </div>
                     </>
                   )}
 
@@ -621,27 +778,38 @@ export default function WatermarkingTool() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div className="space-y-2">
                             <Label className="text-sm font-medium text-gray-700 flex items-center justify-between">
-                              <span>Size</span>
+                              <span>{settings.type === "text" ? "Text Size" : "Image Size"}</span>
                               <div className="flex items-center space-x-2">
                                 <Input
                                   type="number"
-                                  value={settings.fontSize}
+                                  value={settings.type === "text" ? settings.fontSize : settings.imageSize}
                                   onChange={(e) => {
-                                    const value = Math.max(5, Math.min(30, Number(e.target.value) || 5))
-                                    updateSetting("fontSize", value)
+                                    if (settings.type === "text") {
+                                      const value = Math.max(5, Math.min(30, Number(e.target.value) || 5))
+                                      updateSetting("fontSize", value)
+                                    } else {
+                                      const value = Math.max(5, Math.min(50, Number(e.target.value) || 5))
+                                      updateSetting("imageSize", value)
+                                    }
                                   }}
                                   className="w-16 h-6 px-2 text-xs text-center border-gray-300 focus:ring-teal-500 focus:border-teal-500"
                                   min={5}
-                                  max={30}
+                                  max={settings.type === "text" ? 30 : 50}
                                 />
                                 <span className="text-xs text-gray-500">%</span>
                               </div>
                             </Label>
                             <Slider
-                              value={[settings.fontSize]}
-                              onValueChange={(value) => updateSetting("fontSize", value[0])}
+                              value={[settings.type === "text" ? settings.fontSize : settings.imageSize]}
+                              onValueChange={(value) => {
+                                if (settings.type === "text") {
+                                  updateSetting("fontSize", value[0])
+                                } else {
+                                  updateSetting("imageSize", value[0])
+                                }
+                              }}
                               min={5}
-                              max={30}
+                              max={settings.type === "text" ? 30 : 50}
                               step={1}
                               className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-teal-600 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-0 [&_[role=slider]]:focus-visible:ring-0 [&_[role=slider]]:focus-visible:ring-offset-0 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-gray-200 [&>span:first-child]:rounded-full [&>span:last-child]:bg-teal-600 [&>span:last-child]:rounded-full"
                             />
@@ -798,20 +966,27 @@ export default function WatermarkingTool() {
                   </div>
                 )}
 
-                {imageItem.canvas && (
+                {imageItem.canvas ? (
                   <ImageCanvas canvas={imageItem.canvas} onClick={() => openFullscreen(imageItem.canvas!)} />
+                ) : (
+                  <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <LoadingSpinner size="md" className="mb-2" />
+                      <span className="text-xs text-gray-500">Processing...</span>
+                    </div>
+                  </div>
                 )}
 
                 <div className="mt-2 sm:mt-3 flex items-center justify-between">
                   <span className="text-xs sm:text-sm text-gray-600 truncate flex-1 mr-2" title={imageItem.file.name}>
                     {imageItem.file.name}
                   </span>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 sm:space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingImageId(imageItem.id)}
-                      className="text-xs border-gray-300 hover:border-teal-300 hover:text-teal-600 px-2 sm:px-3 h-7 sm:h-8"
+                      className="text-xs border-gray-300 hover:border-teal-300 hover:text-teal-600 px-1.5 sm:px-3 h-7 sm:h-8 min-w-[2rem] sm:min-w-[auto]"
                       title="Customize watermark for this image"
                     >
                       <Edit3 className="w-3 h-3 sm:mr-1" />
@@ -821,8 +996,64 @@ export default function WatermarkingTool() {
                       variant="outline"
                       size="sm"
                       onClick={() => downloadSingleImage(imageItem)}
-                      className="text-xs border-gray-300 hover:border-teal-300 hover:text-teal-600 px-2 sm:px-3 h-7 sm:h-8"
+                      className="text-xs border-gray-300 hover:border-teal-300 hover:text-teal-600 px-1.5 sm:px-3 h-7 sm:h-8 min-w-[2rem] sm:min-w-[auto]"
                       title="Download this image"
+                    >
+                      <Download className="w-3 h-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Download</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Videos Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {videos.map((videoItem) => (
+              <div key={videoItem.id} className="bg-gray-50 rounded-lg p-3 sm:p-4 relative group">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeVideo(videoItem.id)}
+                  className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white w-6 h-6 sm:w-8 sm:h-8 p-0"
+                  title="Remove video"
+                >
+                  <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+
+                {/* Custom Settings Indicator */}
+                {videoItem.customSettings && (
+                  <div className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-teal-600 text-white rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                    <span className="text-xs font-bold">•</span>
+                  </div>
+                )}
+
+                {videoItem.canvas && (
+                  <VideoCanvas canvas={videoItem.canvas} onClick={() => openFullscreenVideo(videoItem.canvas!)} />
+                )}
+
+                <div className="mt-2 sm:mt-3 flex items-center justify-between">
+                  <span className="text-xs sm:text-sm text-gray-600 truncate flex-1 mr-2" title={videoItem.file.name}>
+                    {videoItem.file.name}
+                  </span>
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingVideoId(videoItem.id)}
+                      className="text-xs border-gray-300 hover:border-teal-300 hover:text-teal-600 px-1.5 sm:px-3 h-7 sm:h-8 min-w-[2rem] sm:min-w-[auto]"
+                      title="Customize watermark for this video"
+                    >
+                      <Edit3 className="w-3 h-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Edit</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadSingleVideo(videoItem)}
+                      className="text-xs border-gray-300 hover:border-teal-300 hover:text-teal-600 px-1.5 sm:px-3 h-7 sm:h-8 min-w-[2rem] sm:min-w-[auto]"
+                      title="Download this video"
                     >
                       <Download className="w-3 h-3 sm:mr-1" />
                       <span className="hidden sm:inline">Download</span>
@@ -842,6 +1073,19 @@ export default function WatermarkingTool() {
                 watermarkImage={watermarkImage}
                 onClose={() => setEditingImageId(null)}
                 onSave={(newSettings) => handleImageSettingsSave(editingImage.id, newSettings)}
+              />
+            </Suspense>
+          )}
+
+          {/* Individual Video Settings Modal */}
+          {editingVideo && (
+            <Suspense fallback={<LoadingSpinner size="lg" />}>
+              <VideoSettingsModal
+                videoItem={editingVideo}
+                globalSettings={settings}
+                watermarkImage={watermarkImage}
+                onClose={() => setEditingVideoId(null)}
+                onSave={(newSettings) => handleVideoSettingsSave(editingVideo.id, newSettings)}
               />
             </Suspense>
           )}
@@ -869,12 +1113,36 @@ export default function WatermarkingTool() {
               </div>
             </div>
           )}
+
+          {/* Fullscreen Video Modal */}
+          {fullscreenVideo && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+              onClick={closeFullscreenVideo}
+            >
+              <div className="relative max-w-full max-h-full">
+                <button
+                  onClick={closeFullscreenVideo}
+                  className="absolute top-4 right-4 text-white hover:text-gray-300 z-10 bg-black bg-opacity-50 rounded-full p-2"
+                  title="Close fullscreen"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+                <video
+                  src={fullscreenVideo}
+                  controls
+                  className="max-w-full max-h-full object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <input
           ref={fileInputRef}
           type="file"
-          accept={ACCEPTED_FILE_TYPES.join(",")}
+          accept={[...ACCEPTED_FILE_TYPES, ...ACCEPTED_VIDEO_TYPES].join(",")}
           multiple
           onChange={handleInputChange}
           className="hidden"
@@ -885,7 +1153,7 @@ export default function WatermarkingTool() {
     )
   }
 
-  // Landing page - before image upload
+  // Landing page - before image or video upload
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Header */}
@@ -905,7 +1173,7 @@ export default function WatermarkingTool() {
             Add Watermarks <span className="bg-teal-100 text-teal-800 px-3 py-1 rounded-full font-semibold">Free</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Protect your images with custom watermarks. Fast, secure, and completely free.
+            Protect your images and videos with custom watermarks. Fast, secure, and completely free.
           </p>
         </div>
 
@@ -915,7 +1183,7 @@ export default function WatermarkingTool() {
             className={`relative border-2 border-dashed rounded-2xl p-12 transition-all duration-200 cursor-pointer ${
               dragActive
                 ? "border-teal-400 bg-teal-50"
-                : isProcessing
+                : isProcessing || isProcessingVideos
                   ? "border-gray-300 bg-gray-50 cursor-not-allowed"
                   : "border-gray-300 hover:border-teal-400 hover:bg-teal-50"
             }`}
@@ -923,22 +1191,21 @@ export default function WatermarkingTool() {
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
-            onClick={() => !isProcessing && fileInputRef.current?.click()}
           >
             <input
               ref={fileInputRef}
               type="file"
-              accept={ACCEPTED_FILE_TYPES.join(",")}
+              accept={[...ACCEPTED_FILE_TYPES, ...ACCEPTED_VIDEO_TYPES].join(",")}
               multiple
               onChange={handleInputChange}
               className="hidden"
-              disabled={isProcessing}
+              disabled={isProcessing || isProcessingVideos}
             />
 
-            {isProcessing ? (
+            {isProcessing || isProcessingVideos ? (
               <div className="flex flex-col items-center">
                 <LoadingSpinner size="lg" className="mb-4" />
-                <p className="text-gray-600">Processing your images...</p>
+                <p className="text-gray-600">Processing your files...</p>
               </div>
             ) : (
               <div className="flex flex-col items-center">
@@ -948,11 +1215,12 @@ export default function WatermarkingTool() {
                 <Button
                   size="lg"
                   className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 text-lg font-semibold mb-4"
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  Choose Images
+                  Choose Images or Videos
                 </Button>
                 <p className="text-gray-500">
-                  or drag and drop • JPG, PNG, GIF, WebP, BMP, TIFF, SVG • Multiple files supported
+                  or drag and drop • JPG, PNG, GIF, WebP, BMP, TIFF, SVG, MP4, MOV • Multiple files supported
                 </p>
               </div>
             )}
@@ -966,14 +1234,14 @@ export default function WatermarkingTool() {
               <Zap className="w-6 h-6 text-teal-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-2">Lightning Fast</h3>
-            <p className="text-gray-600 text-sm">Process multiple images in seconds</p>
+            <p className="text-gray-600 text-sm">Process multiple images and videos in seconds</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Shield className="w-6 h-6 text-teal-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-2">100% Private</h3>
-            <p className="text-gray-600 text-sm">Images never leave your browser</p>
+            <p className="text-gray-600 text-sm">Files never leave your browser</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4">
