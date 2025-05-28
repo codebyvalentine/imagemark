@@ -1,4 +1,100 @@
 import type { WatermarkSettings } from "@/types/watermark"
+import type { VideoItem, VideoProcessingOptions } from "@/types/video"
+import { generateId } from "@/utils/format"
+
+/**
+ * Creates a VideoItem from a File
+ */
+export const createVideoItem = async (file: File): Promise<VideoItem> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video")
+    video.preload = "metadata"
+    video.muted = true
+
+    video.onloadedmetadata = () => {
+      // Create thumbnail
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")
+
+      if (ctx) {
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        ctx.drawImage(video, 0, 0)
+
+        const thumbnail = canvas.toDataURL("image/jpeg", 0.7)
+
+        resolve({
+          id: generateId(),
+          file,
+          name: file.name,
+          duration: video.duration,
+          size: file.size,
+          thumbnail,
+          progress: 0,
+          status: "idle",
+        })
+      } else {
+        resolve({
+          id: generateId(),
+          file,
+          name: file.name,
+          duration: 0,
+          size: file.size,
+          progress: 0,
+          status: "idle",
+        })
+      }
+
+      URL.revokeObjectURL(video.src)
+    }
+
+    video.onerror = () => {
+      URL.revokeObjectURL(video.src)
+      reject(new Error(`Failed to load video: ${file.name}`))
+    }
+
+    video.src = URL.createObjectURL(file)
+  })
+}
+
+/**
+ * Processes a video with watermark settings
+ */
+export const processVideo = async (
+  video: VideoItem,
+  settings: WatermarkSettings,
+  options: VideoProcessingOptions,
+  onProgress?: (progress: number) => void,
+): Promise<string> => {
+  // Simulate video processing
+  return new Promise((resolve, reject) => {
+    let progress = 0
+    const interval = setInterval(() => {
+      progress += Math.random() * 20
+      if (progress > 100) progress = 100
+
+      if (onProgress) {
+        onProgress(Math.floor(progress))
+      }
+
+      if (progress >= 100) {
+        clearInterval(interval)
+        // Create a blob URL for the processed video (simulation)
+        const outputUrl = URL.createObjectURL(video.file)
+        resolve(outputUrl)
+      }
+    }, 200)
+
+    // Simulate potential errors
+    setTimeout(() => {
+      if (Math.random() < 0.1) {
+        // 10% chance of error
+        clearInterval(interval)
+        reject(new Error("Processing failed"))
+      }
+    }, 1000)
+  })
+}
 
 /**
  * Creates a video from file with watermark processing
