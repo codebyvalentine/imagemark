@@ -73,7 +73,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 10,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -84,7 +84,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 10,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -95,7 +95,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 10,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -106,7 +106,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 50,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute top-1/2 left-0.5 transform -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute top-1/2 left-0.5 transform -translate-y-1/2 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -117,7 +117,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 50,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -128,7 +128,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 50,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute top-1/2 right-0.5 transform -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute top-1/2 right-0.5 transform -translate-y-1/2 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -139,7 +139,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 90,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute bottom-0.5 left-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute bottom-0.5 left-0.5 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -150,7 +150,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 90,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
@@ -161,7 +161,7 @@ export const POSITION_PRESETS: PositionPreset[] = [
     y: 90,
     icon: (
       <div className="w-8 h-8 border-2 border-gray-300 rounded-md relative bg-white">
-        <div className="absolute bottom-0.5 right-0.5 w-2 h-2 bg-gray-400 rounded-sm" />
+        <div className="absolute bottom-0.5 right-0.5 w-2 h-2 bg-current rounded-sm" />
       </div>
     ),
   },
